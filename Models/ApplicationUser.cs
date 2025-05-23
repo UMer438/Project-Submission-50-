@@ -5,14 +5,10 @@ namespace DigitalLockerSystem.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        [Required]
-        public string FullName { get; set; } = string.Empty;
-
-        [Required]
-        [Range(1, 120)]
+        public string FullName { get; set; }
         public int Age { get; set; }
-
-        [Required]
-        public string Address { get; set; } = string.Empty;
+        public string Address { get; set; }
+      
     }
+
 }

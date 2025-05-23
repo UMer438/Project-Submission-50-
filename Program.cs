@@ -3,12 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using DigitalLockerSystem.Data;
 using Microsoft.AspNetCore.Http.Features;
 using DigitalLockerSystem.Models;
+using DigitalLockerSystem.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// -----------------------------
-// Configure Services
-// -----------------------------
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -20,15 +18,15 @@ builder.Services.AddScoped<IFileRepository, FileRepository>();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     {
-        options.SignIn.RequireConfirmedAccount = true;
+        options.SignIn.RequireConfirmedAccount = false;
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddSignalR();
 
-// ✅ 5 GB Upload Configuration
 builder.Services.Configure<FormOptions>(options =>
 {
     options.MultipartBodyLengthLimit = 5L * 1024 * 1024 * 1024;
@@ -41,9 +39,6 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 
 var app = builder.Build();
 
-// -----------------------------
-// ✅ Seed Admin Role and User
-// -----------------------------
 await SeedAdminUserAndRoleAsync(app.Services);
 
 async Task SeedAdminUserAndRoleAsync(IServiceProvider services)
@@ -104,5 +99,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
+app.MapHub<ChatHub>("/chathub");
 
 app.Run();
